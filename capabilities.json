@@ -1,6 +1,6 @@
 {
   "student": "P Roopa, 1179353",
-  "repo": "",
+  "repo": "https://github.com/RoopaPachipala/inboxhero",
   "system": {
     "framework": "none",
     "model": "gemini-2.0-flash to polish drafts when GEMINI_API_KEY is set; developed and marked against the rule/template path so every --cap command runs with no key. Optional provider is Gemini via google-genai.",
