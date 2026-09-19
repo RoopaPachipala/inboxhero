@@ -1,0 +1,15 @@
+{
+  "no_meetings_before": {
+    "value": "11:00",
+    "source": "m041",
+    "text": "Do not accept meetings before 11:00am",
+    "updated": "2026-09-19T11:57:56Z"
+  },
+  "legal_cc": {
+    "value": "priya@paperjet.io",
+    "match_domain": "hartwellcho.com",
+    "source": "m015",
+    "text": "CC priya@paperjet.io on anything from Hartwell & Cho",
+    "updated": "2026-09-19T11:57:56Z"
+  }
+}

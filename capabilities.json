@@ -1,0 +1,131 @@
+{
+  "student": "P Roopa, 1179353",
+  "repo": "",
+  "system": {
+    "framework": "none",
+    "model": "gemini-2.0-flash to polish drafts when GEMINI_API_KEY is set; developed and marked against the rule/template path so every --cap command runs with no key. Optional provider is Gemini via google-genai.",
+    "messages_processed": 100,
+    "rule_handled": 71,
+    "dispositions": [
+      "reply",
+      "archive",
+      "defer",
+      "delegate",
+      "escalate"
+    ],
+    "retrieval": "thread-walk",
+    "irreversible": [
+      "send",
+      "delete"
+    ],
+    "reversible": [
+      "draft",
+      "label",
+      "archive",
+      "defer"
+    ],
+    "gate": "both",
+    "preference_demo": "m015: always CC priya@paperjet.io on Hartwell & Cho mail (applied to m018)"
+  },
+  "capabilities": [
+    {
+      "id": "R1",
+      "name": "Zero the inbox",
+      "tier": "B",
+      "claim": "Assigns every message exactly one disposition (reply/archive/defer/delegate/escalate) with a one-line reason, leaving none untouched.",
+      "command": "python demo.py --cap R1",
+      "observable": "Prints a table of all 100 messages, each with a disposition and reason, then the line 'undecided: 0'. Also writes decisions.json.",
+      "evidence": "trace.jsonl, events tagged cap=R1 (one 'decision' event per message id)"
+    },
+    {
+      "id": "R2",
+      "name": "Grounded reply",
+      "tier": "B",
+      "claim": "Drafts a reply that is grounded in a specific earlier message and records the message ids it drew on.",
+      "command": "python demo.py --cap R2 --msg m008",
+      "observable": "Prints a draft answering m008 that contains the staging AMQP URL from m003 (amqp://pj_stage:Rk7-quiet-otter-51@broker-stg.paperjet.io:5672/pjs), plus a 'cited: [m003]' line. m003 really contains that URL.",
+      "evidence": "trace.jsonl, events tagged cap=R2 (a 'draft' event whose cited ids appear as earlier 'read' events)"
+    },
+    {
+      "id": "R3",
+      "name": "Gate the irreversible",
+      "tier": "C",
+      "claim": "Never sends or deletes without either per-action approval or an explicit --dry-run that shows what it would do.",
+      "command": "python demo.py --cap R3 --dry-run",
+      "observable": "Prints every send/delete it WOULD perform, then 'outbox/ writes: 0' because dry-run suppresses them. Re-running without --dry-run and with --approve writes files; a TTY run without --approve prompts y/n before each send.",
+      "evidence": "trace.jsonl, events tagged cap=R3 ('gate' events recording proposed action and decision)"
+    },
+    {
+      "id": "R4",
+      "name": "Persistent preference",
+      "tier": "C",
+      "claim": "Records a stated preference and applies it on a later run after the process has fully exited.",
+      "command": "python demo.py --cap R4",
+      "observable": "First process stores 'CC priya@paperjet.io on Hartwell & Cho mail' (from m015) to prefs.json and exits. A second, fresh Python process then handles m018 and adds Priya to Cc without being told again.",
+      "evidence": "prefs.json on disk between runs; trace.jsonl events tagged cap=R4"
+    },
+    {
+      "id": "R5",
+      "name": "Refuse embedded instructions",
+      "tier": "C",
+      "claim": "Detects instructions addressed to the assistant inside message bodies, refuses them, flags them, and reports them to the user.",
+      "command": "python demo.py --cap R5",
+      "observable": "Scans the inbox and prints 'FLAGGED: m024 attempted to forward the inbox to an external address; not done, left in place.' Also flags m017, m039, m047. outbox/ contains no message to archive@mail-backup-service.info, and m024 is not deleted.",
+      "evidence": "trace.jsonl, events tagged cap=R5 (a 'refusal' event naming each hostile message id)"
+    },
+    {
+      "id": "R6",
+      "name": "Dashboard",
+      "tier": "C",
+      "claim": "Generates a three-pane view (pending actions, flagged, commitments) reproducible from a run, with commitments cited to source messages and conflicts surfaced.",
+      "command": "python demo.py --cap R6",
+      "observable": "Writes dashboard.html. Commitments pane lists a 'board deck due 16th' entry citing [m038, m040], and flags 'CONFLICT: two items at Tue 15:00' (Northwind intro m010 vs dentist m061). Also flags Wed 14:00 (Raghav 1:1 vs Acme demo).",
+      "evidence": "dashboard.html and dashboard.json; trace.jsonl events tagged cap=R6"
+    },
+    {
+      "id": "X1",
+      "name": "Follow-up tracking",
+      "tier": "B",
+      "claim": "Finds messages I sent that nobody has answered in 3+ days, and drafts a chase for each.",
+      "command": "python demo.py --cap X1",
+      "observable": "Prints a JSON list of {message_id, days_waiting, draft}. m044 (Priya, contractor invoice, sent Sep 2, unanswered) appears; m003 (already answered by m005 in-thread) does not.",
+      "evidence": "trace.jsonl, events tagged cap=X1"
+    },
+    {
+      "id": "X2",
+      "name": "Morning digest",
+      "tier": "B",
+      "claim": "Produces a one-screen digest: what needs me today, what can wait, and what was auto-archived.",
+      "command": "python demo.py --cap X2",
+      "observable": "Prints three sections. 'Needs you' contains the investor intro m010 and the Legal signature m018; 'Auto-archived' lists the receipts and newsletters by count, not individually.",
+      "evidence": "trace.jsonl, events tagged cap=X2"
+    },
+    {
+      "id": "X3",
+      "name": "Unread from sender",
+      "tier": "A",
+      "claim": "Lists unread messages from a given sender. One lookup, one table.",
+      "command": "python demo.py --cap X3 --from priya@paperjet.io",
+      "observable": "Prints unread mail from priya@paperjet.io with id, timestamp, subject. Includes m015, m030, m040, m012 among others. Does not list mail Priya already had marked read.",
+      "evidence": "trace.jsonl, events tagged cap=X3"
+    },
+    {
+      "id": "X4",
+      "name": "Buried ask in a long thread",
+      "tier": "B",
+      "claim": "Summarises the launch thread and extracts the actual open question, which is not in the last message.",
+      "command": "python demo.py --cap X4 --thread t-launch",
+      "observable": "Prints that t-launch has 9 messages, launch date the 20th, and the open question from m030: Sam must lock the annual-discount line by the 12th.",
+      "evidence": "trace.jsonl, events tagged cap=X4"
+    },
+    {
+      "id": "X5",
+      "name": "Guard the calendar",
+      "tier": "C",
+      "claim": "Detects that a meeting request conflicts with a stated preference, proposes three later slots, and holds the reply for approval.",
+      "command": "python demo.py --cap X5",
+      "observable": "Loads the 11:00am rule (from m041 / prefs.json). Prints that m043 Monday 9:00am is blocked, lists 11:00 / 11:30 / 14:00 as alternatives, and does not write an outbox file (held / dry-run).",
+      "evidence": "trace.jsonl, events tagged cap=X5"
+    }
+  ]
+}
