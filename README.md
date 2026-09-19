@@ -1,7 +1,7 @@
 # inboxHero
 
-**Student:** P Roopa, 1179353  
-**Repository:** git history is in this project (see `git log`). I could not log into personal GitHub from this machine, so the public URL is not here yet. Do not use a work/org GitHub for this.
+**Student:** P Roopa, 1179353
+**Repository:** https://github.com/RoopaPachipala/inboxhero
 
 Assignment 6 — empty Sam's inbox without doing the dumb / dangerous bits.
 
